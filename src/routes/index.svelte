@@ -152,4 +152,15 @@
     border: 1px solid var(--color-dark-snow);
     box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
   }
+
+  @media (max-width: 768px) {
+    .node-container {
+      flex-direction: column;
+
+      > .blurb,
+      .links {
+        margin-left: 32px;
+      }
+    }
+  }
 </style>
