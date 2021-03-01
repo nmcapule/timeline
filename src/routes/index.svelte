@@ -1,7 +1,7 @@
 <script lang="ts">
   let title = "Presentation of a thing";
 
-  function blurbGenerator(asArray = false, min = 2, max = 5, fillchar = "-") {
+  function blurbGenerator(asArray = false, min = 2, max = 5, fillchar = "▇") {
     const paragraphCount = Math.random() * (max - min) + min;
     const paragraphs = [];
 
@@ -40,38 +40,38 @@
           {
             url: "http://www.google.com",
             title: "Google Link",
-            description: blurbGenerator(false, 1, 1, "a"),
+            description: blurbGenerator(false, 1, 1),
           },
           {
             url: "http://www.google.com",
             title: "Google Link 2",
-            description: blurbGenerator(false, 1, 1, "a"),
+            description: blurbGenerator(false, 1, 1),
           },
         ],
         tags: ["career"],
-        blurb: blurbGenerator(true, 0, 5, "a"),
+        blurb: blurbGenerator(true, 0, 5),
       },
       {
         links: [
           {
             url: "http://www.google.com",
             title: "Google Link",
-            description: blurbGenerator(false, 1, 1, "a"),
+            description: blurbGenerator(false, 1, 1),
           },
         ],
         tags: ["career"],
-        blurb: blurbGenerator(true, 0, 5, "a"),
+        blurb: blurbGenerator(true, 0, 5),
       },
       {
         links: [
           {
             url: "http://www.google.com",
             title: "Google Link",
-            description: blurbGenerator(false, 1, 1, "a"),
+            description: blurbGenerator(false, 1, 1),
           },
         ],
         tags: ["career"],
-        blurb: blurbGenerator(true, 0, 5, "a"),
+        blurb: blurbGenerator(true, 0, 5),
       },
     ],
   };
@@ -97,7 +97,7 @@
         </a>
       {/each}
     </div>
-    <div>
+    <div class="blurb">
       {#each node.blurb as paragraph}
         <p>{paragraph}</p>
       {/each}
@@ -115,6 +115,10 @@
       display: flex;
       flex-direction: column;
       min-width: 320px;
+    }
+
+    > .blurb {
+      color: var(--color-silver);
     }
   }
 
