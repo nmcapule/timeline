@@ -1,87 +1,42 @@
 <script lang="ts">
-  let title = "Presentation of a thing";
+  import LinkBlurb from "../components/LinkBlurb.svelte";
+  import LinkPreview from "../components/LinkPreview.svelte";
+  import { timelineStub } from "../stubs/timeline";
 
-  function blurbGenerator(asArray = false, min = 2, max = 5, fillchar = "▇") {
-    const paragraphCount = Math.random() * (max - min) + min;
-    const paragraphs = [];
+  let timeline = timelineStub;
+  let editing = true;
 
-    for (let i = 0; i < paragraphCount; i++) {
-      const sentenceCount = Math.random() * 5 + 2;
-      const sentences = [];
-
-      for (let j = 0; j < sentenceCount; j++) {
-        const wordCount = Math.random() * 10 + 4;
-        const words = [];
-
-        for (let k = 0; k < wordCount; k++) {
-          const wordLen = Math.floor(Math.random() * 5 + 1);
-          words.push(new Array(wordLen).fill(fillchar).join(""));
-        }
-
-        sentences.push(words.join(" ") + ".");
-      }
-
-      paragraphs.push(sentences.join(" "));
-    }
-
-    if (asArray) {
-      return paragraphs;
-    } else {
-      return paragraphs.join("\n\n");
-    }
+  function actionMoveUp(node) {
+    console.log("move up", node);
   }
-
-  let timeline = {
-    title: "Lorem ipsum dolor sit amet",
-    created: new Date(),
-    nodes: [
-      {
-        links: [
-          {
-            url: "http://www.google.com",
-            title: "Google Link",
-            description: blurbGenerator(false, 1, 1),
-          },
-          {
-            url: "http://www.google.com",
-            title: "Google Link 2",
-            description: blurbGenerator(false, 1, 1),
-          },
-        ],
-        tags: ["career"],
-        blurb: blurbGenerator(true, 0, 5),
-      },
-      {
-        links: [
-          {
-            url: "http://www.google.com",
-            title: "Google Link",
-            description: blurbGenerator(false, 1, 1),
-          },
-        ],
-        tags: ["career"],
-        blurb: blurbGenerator(true, 0, 5),
-      },
-      {
-        links: [
-          {
-            url: "http://www.google.com",
-            title: "Google Link",
-            description: blurbGenerator(false, 1, 1),
-          },
-        ],
-        tags: ["career"],
-        blurb: blurbGenerator(true, 0, 5),
-      },
-    ],
-  };
+  function actionMoveDown(node) {
+    console.log("move down", node);
+  }
+  function actionItemDelete(node) {
+    console.log("item delete", node);
+  }
+  function actionItemAdd(node) {
+    console.log("item add", node);
+  }
+  function actionLinkEdit(node, link) {
+    console.log("link edit", node, link);
+  }
+  function actionLinkDelete(node, link) {
+    console.log("link delete", node, link);
+  }
+  function actionLinkAdd(node) {
+    console.log("link add", node);
+  }
 </script>
 
 <svelte:head>
   <title>{timeline.title}</title>
 </svelte:head>
 
-<h1>{timeline.title}</h1>
+<div class="title-container">
+  <h1 contenteditable={editing}>{timeline.title}</h1>
+  <button on:click={() => (editing = !editing)}>Edit</button>
+</div>
 {#each timeline.nodes as node, i}
   <div class="node-container">
     <div class="timeline-graph">
@@ -89,19 +44,56 @@
       {#if i < timeline.nodes.length - 1}
         <div class="line" />
       {/if}
+      {#if editing}
+        <div class="edit-nodes">
+          <button
+            disabled={i === 0}
+            on:click={() => actionMoveUp(node)}
+            title="Move up"
+            class="marker"
+          >
+            ⬆
+          </button>
+          <button
+            disabled={i === timeline.nodes.length - 1}
+            on:click={() => actionMoveDown(node)}
+            title="Move down"
+            class="marker"
+          >
+            ⬇
+          </button>
+          <button
+            disabled={timeline.nodes.length <= 1}
+            on:click={() => actionItemDelete(node)}
+            title="Delete"
+            class="marker -small"
+          >
+            🗑️
+          </button>
+          <button
+            on:click={() => actionItemAdd(node)}
+            title="Add new"
+            class="marker -small"
+          >
+            ➕
+          </button>
+        </div>
+      {/if}
     </div>
     <div class="links">
       {#each node.links as link}
-        <a href={link.url} class="link-preview">
-          {link.title}
-        </a>
+        <LinkPreview
+          {link}
+          {editing}
+          on:edit={() => actionLinkEdit(node, link)}
+          on:delete={() => actionLinkDelete(node, link)}
+        />
       {/each}
+      {#if editing}
+        <button on:click={() => actionLinkAdd(node)}>Add sibling link</button>
+      {/if}
     </div>
-    <div class="blurb">
-      {#each node.blurb as paragraph}
-        <p>{paragraph}</p>
-      {/each}
-    </div>
+    <LinkBlurb blurb={node.blurb} {editing} />
   </div>
 {/each}
 
@@ -115,10 +107,11 @@
       display: flex;
       flex-direction: column;
       min-width: 320px;
-    }
+      margin: 12px;
 
-    > .blurb {
-      color: var(--color-silver);
+      > :global(.link-preview:not(:first-child)) {
+        margin-top: 12px;
+      }
     }
   }
 
@@ -126,13 +119,38 @@
     --marker-size: 24px;
     --marker-color: var(--color-silver);
 
-    > .marker {
+    .marker-mixin() {
       background-color: var(--marker-color);
       width: var(--marker-size);
       height: var(--marker-size);
+      border-radius: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    > .marker {
       margin-right: 12px;
       margin-top: 32px;
-      border-radius: 100%;
+      .marker-mixin();
+    }
+
+    .edit-nodes {
+      position: absolute;
+      z-index: 100;
+
+      > .marker {
+        .marker-mixin();
+
+        background-color: var(--color-white);
+        border: 1px dashed var(--marker-color);
+        margin-top: 4px;
+        cursor: pointer;
+
+        &.-small {
+          font-size: 0.75em;
+        }
+      }
     }
 
     > .line {
@@ -144,21 +162,15 @@
     }
   }
 
-  .link-preview {
-    border-radius: 5px;
-    margin: 12px;
-    padding: 12px;
-    min-height: 64px;
-    border: 1px solid var(--color-dark-snow);
-    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
-  }
-
   @media (max-width: 768px) {
     .node-container {
       flex-direction: column;
 
-      > .blurb,
       .links {
+        margin-left: 32px;
+      }
+
+      :global(.link-blurb) {
         margin-left: 32px;
       }
     }
