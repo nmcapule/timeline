@@ -1,10 +1,26 @@
 <script lang="ts">
+  import localforage from "localforage";
+  import { onMount } from "svelte";
+
   import TimelineNode from "../components/TimelineNode.svelte";
-  import type { Node } from "../models/timeline";
+  import type { Node, Timeline } from "../models/timeline";
   import { emptyNode, timelineStub } from "../stubs/timeline";
 
-  let timeline = timelineStub();
+  const _DEFAULT_ID = "12345";
+
+  let timeline: Timeline;
   let editing = false;
+
+  onMount(async () => {
+    timeline = await localforage.getItem(_DEFAULT_ID);
+    if (!timeline) {
+      timeline = timelineStub();
+    }
+  });
+
+  $: if (timeline) {
+    localforage.setItem(_DEFAULT_ID, timeline);
+  }
 
   function actionMoveUp(targetNode) {
     const index = timeline.nodes.findIndex((v) => v.id === targetNode.id);
@@ -60,14 +76,16 @@
 </script>
 
 <svelte:head>
-  <title>{timeline.title}</title>
+  <title>{timeline?.title}</title>
 </svelte:head>
 
 <div class="title-container">
-  <h1 contenteditable={editing} on:keyup={actionTitleEdit}>{timeline.title}</h1>
+  <h1 contenteditable={editing} on:keyup={actionTitleEdit}>
+    {timeline?.title}
+  </h1>
   <button on:click={() => (editing = !editing)}>Edit</button>
 </div>
-{#each timeline.nodes as node, i (node.id)}
+{#each timeline?.nodes || [] as node, i (node.id)}
   <div id={node.id} class="node-container">
     <div class="timeline-graph">
       <div class="marker" />
