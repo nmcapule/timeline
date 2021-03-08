@@ -1,31 +1,51 @@
 <script lang="ts">
-  import LinkBlurb from "../components/LinkBlurb.svelte";
-  import LinkPreview from "../components/LinkPreview.svelte";
-  import { timelineStub } from "../stubs/timeline";
+  import TimelineNode from "../components/TimelineNode.svelte";
+  import type { Node } from "../models/timeline";
+  import { emptyNode, timelineStub } from "../stubs/timeline";
 
   let timeline = timelineStub;
   let editing = true;
 
-  function actionMoveUp(node) {
-    console.log("move up", node);
+  function actionMoveUp(targetNode) {
+    const index = timeline.nodes.findIndex((v) => v.id === targetNode.id);
+    const swapIndex = Math.max(index - 1, 0);
+    const nodes = timeline.nodes.map((link, idx) => {
+      if (idx === index) return timeline.nodes[swapIndex];
+      if (idx === swapIndex) return timeline.nodes[index];
+      return link;
+    });
+    timeline = { ...timeline, nodes };
   }
-  function actionMoveDown(node) {
-    console.log("move down", node);
+  function actionMoveDown(targetNode) {
+    const index = timeline.nodes.findIndex((v) => v.id === targetNode.id);
+    const swapIndex = Math.min(index + 1, timeline.nodes.length - 1);
+    const nodes = timeline.nodes.map((link, idx) => {
+      if (idx === index) return timeline.nodes[swapIndex];
+      if (idx === swapIndex) return timeline.nodes[index];
+      return link;
+    });
+    timeline = { ...timeline, nodes };
   }
-  function actionItemDelete(node) {
-    console.log("item delete", node);
+  function actionItemDelete(targetNode) {
+    const nodes = timeline.nodes.filter((node) => node.id !== targetNode.id);
+    timeline = { ...timeline, nodes };
   }
-  function actionItemAdd(node) {
-    console.log("item add", node);
+  function actionItemAdd(targetNode) {
+    const nodes = [...timeline.nodes];
+    const index = nodes.findIndex((v) => v.id === targetNode.id);
+    nodes.splice(index + 1, 0, emptyNode());
+    timeline = { ...timeline, nodes };
   }
-  function actionLinkEdit(node, link) {
-    console.log("link edit", node, link);
-  }
-  function actionLinkDelete(node, link) {
-    console.log("link delete", node, link);
-  }
-  function actionLinkAdd(node) {
-    console.log("link add", node);
+  function actionNodeEdit(event: CustomEvent<Node>) {
+    timeline = {
+      ...timeline,
+      nodes: timeline.nodes.map((node) => {
+        if (node.id !== event.detail.id) {
+          return node;
+        }
+        return event.detail;
+      }),
+    };
   }
 </script>
 
@@ -80,20 +100,7 @@
         </div>
       {/if}
     </div>
-    <div class="links">
-      {#each node.links as link}
-        <LinkPreview
-          {link}
-          {editing}
-          on:edit={() => actionLinkEdit(node, link)}
-          on:delete={() => actionLinkDelete(node, link)}
-        />
-      {/each}
-      {#if editing}
-        <button on:click={() => actionLinkAdd(node)}>Add sibling link</button>
-      {/if}
-    </div>
-    <LinkBlurb blurb={node.blurb} {editing} />
+    <TimelineNode {node} {editing} on:edit={actionNodeEdit} />
   </div>
 {/each}
 
@@ -102,17 +109,6 @@
     display: flex;
     flex-direction: row;
     position: relative;
-
-    > .links {
-      display: flex;
-      flex-direction: column;
-      min-width: 320px;
-      margin: 12px;
-
-      > :global(.link-preview:not(:first-child)) {
-        margin-top: 12px;
-      }
-    }
   }
 
   .timeline-graph {
@@ -159,20 +155,6 @@
       width: 2px;
       height: 100%;
       background-color: var(--marker-color);
-    }
-  }
-
-  @media (max-width: 768px) {
-    .node-container {
-      flex-direction: column;
-
-      .links {
-        margin-left: 32px;
-      }
-
-      :global(.link-blurb) {
-        margin-left: 32px;
-      }
     }
   }
 </style>

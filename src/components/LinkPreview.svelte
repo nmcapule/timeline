@@ -1,23 +1,12 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
-
   import type { Link } from "../models/timeline";
 
-  const dispatch = createEventDispatcher();
-
   export let link: Link;
-  export let editing = false;
 </script>
 
 <a href={link.url} class="link-preview" target="_blank">
   <div class="title">{link.title}</div>
 </a>
-{#if editing}
-  <div class="editing">
-    <input on:change={() => dispatch("edit")} type="text" value={link.url} />
-    <button on:click={() => dispatch("delete")}>Delete</button>
-  </div>
-{/if}
 
 <style lang="less">
   .link-preview {
@@ -30,13 +19,5 @@
 
     display: flex;
     flex-direction: column;
-  }
-
-  .editing {
-    display: flex;
-
-    > input {
-      flex-grow: 1;
-    }
   }
 </style>
