@@ -23,7 +23,7 @@ export function blurbGenerator(
   }
 
   if (asArray) {
-    return paragraphs;
+    return paragraphs as any;
   } else {
     return paragraphs.join("\n\n");
   }

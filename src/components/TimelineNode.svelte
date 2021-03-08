@@ -31,7 +31,8 @@
     });
     dispatch("edit", { ...node, links });
   }
-  function linkEdit(targetLink: Link) {
+  function linkEdit(targetLink: Link, event: Event) {
+    targetLink.url = (event.target as any).value;
     const links = node.links.map((link) =>
       link.id === targetLink.id ? targetLink : link
     );
@@ -48,18 +49,18 @@
     dispatch("edit", { ...node, links });
   }
   function blurbEdit(blurb: string) {
-    dispatch("edit", { ...node, blurb: blurb });
+    dispatch("edit", { ...node, blurb });
   }
 </script>
 
 <div class="timeline-node">
   <div class="links">
-    {#each node.links as link, i}
+    {#each node.links as link, i (link.id)}
       <LinkPreview {link} />
       {#if editing}
         <div class="editing">
           <input
-            on:change={() => linkEdit(link)}
+            on:change={(event) => linkEdit(link, event)}
             type="text"
             value={link.url}
           />

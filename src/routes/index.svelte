@@ -3,8 +3,8 @@
   import type { Node } from "../models/timeline";
   import { emptyNode, timelineStub } from "../stubs/timeline";
 
-  let timeline = timelineStub;
-  let editing = true;
+  let timeline = timelineStub();
+  let editing = false;
 
   function actionMoveUp(targetNode) {
     const index = timeline.nodes.findIndex((v) => v.id === targetNode.id);
@@ -15,6 +15,11 @@
       return link;
     });
     timeline = { ...timeline, nodes };
+    setTimeout(() => {
+      document
+        .getElementById(targetNode.id)
+        .scrollIntoView({ block: "start", behavior: "smooth" });
+    }, 0);
   }
   function actionMoveDown(targetNode) {
     const index = timeline.nodes.findIndex((v) => v.id === targetNode.id);
@@ -25,6 +30,11 @@
       return link;
     });
     timeline = { ...timeline, nodes };
+    setTimeout(() => {
+      document
+        .getElementById(targetNode.id)
+        .scrollIntoView({ block: "start", behavior: "smooth" });
+    }, 0);
   }
   function actionItemDelete(targetNode) {
     const nodes = timeline.nodes.filter((node) => node.id !== targetNode.id);
@@ -37,15 +47,15 @@
     timeline = { ...timeline, nodes };
   }
   function actionNodeEdit(event: CustomEvent<Node>) {
-    timeline = {
-      ...timeline,
-      nodes: timeline.nodes.map((node) => {
-        if (node.id !== event.detail.id) {
-          return node;
-        }
-        return event.detail;
-      }),
-    };
+    const nodes = timeline.nodes.map((node) =>
+      node.id === event.detail.id ? event.detail : node
+    );
+    timeline = { ...timeline, nodes };
+  }
+  function actionTitleEdit(event: KeyboardEvent) {
+    const elem = event.target as HTMLElement;
+    const title = elem.innerText;
+    timeline = { ...timeline, title };
   }
 </script>
 
@@ -54,11 +64,11 @@
 </svelte:head>
 
 <div class="title-container">
-  <h1 contenteditable={editing}>{timeline.title}</h1>
+  <h1 contenteditable={editing} on:keyup={actionTitleEdit}>{timeline.title}</h1>
   <button on:click={() => (editing = !editing)}>Edit</button>
 </div>
-{#each timeline.nodes as node, i}
-  <div class="node-container">
+{#each timeline.nodes as node, i (node.id)}
+  <div id={node.id} class="node-container">
     <div class="timeline-graph">
       <div class="marker" />
       {#if i < timeline.nodes.length - 1}

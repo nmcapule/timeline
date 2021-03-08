@@ -1,43 +1,53 @@
 <script lang="ts">
-  import { createEventDispatcher, onDestroy } from "svelte";
-  import { Subject } from "rxjs";
-  import { debounceTime, filter } from "rxjs/operators";
+  import { createEventDispatcher, onMount } from "svelte";
+  import { v4 as uuidv4 } from "uuid";
 
   const dispatch = createEventDispatcher();
+  const uuid = uuidv4();
 
-  export let blurb: string | any[];
+  export let blurb: any;
   export let editing = false;
 
-  const edit = new Subject();
-  edit
-    .pipe(
-      filter(() => editing),
-      debounceTime(1000)
-    )
-    .subscribe((event: CustomEvent) => {
-      const elem = event.target as HTMLElement;
-      const blurb = elem.innerText.split("\n\n");
-      dispatch("edit", blurb);
+  let editor: any;
+  onMount(async () => {
+    const { default: Quill } = await import("quill");
+    const selector = "#" + CSS.escape(uuid);
+    editor = new Quill(selector, {
+      placeholder: "Type here to add text...",
+      theme: "bubble",
     });
 
-  onDestroy(() => {
-    edit.complete();
+    editor.on("text-change", () => {
+      if (!editing) {
+        return;
+      }
+      dispatch("edit", editor.getContents());
+    });
   });
+
+  $: if (editor) {
+    editor.enable(editing);
+  }
+
+  $: if (editor && blurb && !editing) {
+    if (typeof blurb === "string") {
+      editor.setText(blurb);
+    } else {
+      editor.setContents(blurb);
+    }
+  }
 </script>
 
-<div
-  class="link-blurb"
-  contenteditable={editing}
-  on:keyup={(event) => edit.next(event)}
->
-  {#each blurb as paragraph}
-    <p>{paragraph}</p>
-  {/each}
+<div class="link-blurb">
+  <div id={uuid} />
 </div>
 
 <style lang="less">
   .link-blurb {
-    color: var(--color-silver);
     flex-grow: 1;
+
+    :global(.ql-editor) {
+      font-size: 16px;
+    }
   }
 </style>
