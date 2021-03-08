@@ -76,61 +76,65 @@
 </script>
 
 <svelte:head>
-  <title>{timeline?.title}</title>
+  {#if timeline}
+    <title>{timeline.title}</title>
+  {/if}
 </svelte:head>
 
-<div class="title-container">
-  <h1 contenteditable={editing} on:keyup={actionTitleEdit}>
-    {timeline?.title}
-  </h1>
-  <button on:click={() => (editing = !editing)}>Edit</button>
-</div>
-{#each timeline?.nodes || [] as node, i (node.id)}
-  <div id={node.id} class="node-container">
-    <div class="timeline-graph">
-      <div class="marker" />
-      {#if i < timeline.nodes.length - 1}
-        <div class="line" />
-      {/if}
-      {#if editing}
-        <div class="edit-nodes">
-          <button
-            disabled={i === 0}
-            on:click={() => actionMoveUp(node)}
-            title="Move up"
-            class="marker"
-          >
-            ⬆
-          </button>
-          <button
-            disabled={i === timeline.nodes.length - 1}
-            on:click={() => actionMoveDown(node)}
-            title="Move down"
-            class="marker"
-          >
-            ⬇
-          </button>
-          <button
-            disabled={timeline.nodes.length <= 1}
-            on:click={() => actionItemDelete(node)}
-            title="Delete"
-            class="marker -small"
-          >
-            🗑️
-          </button>
-          <button
-            on:click={() => actionItemAdd(node)}
-            title="Add new"
-            class="marker -small"
-          >
-            ➕
-          </button>
-        </div>
-      {/if}
-    </div>
-    <TimelineNode {node} {editing} on:edit={actionNodeEdit} />
+{#if timeline}
+  <div class="title-container">
+    <h1 contenteditable={editing} on:keyup={actionTitleEdit}>
+      {timeline.title}
+    </h1>
+    <button on:click={() => (editing = !editing)}>Edit</button>
   </div>
-{/each}
+  {#each timeline.nodes as node, i (node.id)}
+    <div id={node.id} class="node-container">
+      <div class="timeline-graph">
+        <div class="marker" />
+        {#if i < timeline.nodes.length - 1}
+          <div class="line" />
+        {/if}
+        {#if editing}
+          <div class="edit-nodes">
+            <button
+              disabled={i === 0}
+              on:click={() => actionMoveUp(node)}
+              title="Move up"
+              class="marker"
+            >
+              ⬆
+            </button>
+            <button
+              disabled={i === timeline.nodes.length - 1}
+              on:click={() => actionMoveDown(node)}
+              title="Move down"
+              class="marker"
+            >
+              ⬇
+            </button>
+            <button
+              disabled={timeline.nodes.length <= 1}
+              on:click={() => actionItemDelete(node)}
+              title="Delete"
+              class="marker -small"
+            >
+              🗑️
+            </button>
+            <button
+              on:click={() => actionItemAdd(node)}
+              title="Add new"
+              class="marker -small"
+            >
+              ➕
+            </button>
+          </div>
+        {/if}
+      </div>
+      <TimelineNode {node} {editing} on:edit={actionNodeEdit} />
+    </div>
+  {/each}
+{/if}
 
 <style lang="less">
   .node-container {
