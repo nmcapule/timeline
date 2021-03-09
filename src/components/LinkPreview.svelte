@@ -12,10 +12,8 @@
   {#if link.description}
     <div class="description">{link.description}</div>
   {/if}
-  <div class="url">
-    {link.url}
-  </div></a
->
+  <div class="url">{link.url}</div>
+</a>
 
 <style lang="less">
   .link-preview {

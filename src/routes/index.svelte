@@ -73,6 +73,14 @@
     const title = elem.innerText;
     timeline = { ...timeline, title };
   }
+  function copyExport() {
+    const elem = document.querySelector("#timeline-code");
+
+    elem.select();
+    elem.setSelectionRange(0, 99999);
+
+    document.execCommand("copy");
+  }
 </script>
 
 <svelte:head>
@@ -135,12 +143,23 @@
     </div>
   {/each}
 {/if}
+{#if editing}
+  <textarea id="timeline-code">{JSON.stringify(timeline, null, 4)}</textarea>
+  <button on:click={() => copyExport()}>Copy JSON Export</button>
+{/if}
 
 <style lang="less">
   .node-container {
     display: flex;
     flex-direction: row;
     position: relative;
+  }
+
+  #timeline-code {
+    height: 400px;
+    max-height: 400px;
+    width: 100%;
+    overflow: auto;
   }
 
   .timeline-graph {
