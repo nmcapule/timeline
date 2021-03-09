@@ -5,7 +5,13 @@
 </script>
 
 <a href={link.url} class="link-preview" target="_blank">
+  {#if link.imageUrl}
+    <img class="image" src={link.imageUrl} alt="link preview" />
+  {/if}
   <div class="title">{link.title}</div>
+  {#if link.description}
+    <div class="description">{link.description}</div>
+  {/if}
 </a>
 
 <style lang="less">
@@ -19,5 +25,15 @@
 
     display: flex;
     flex-direction: column;
+
+    > .title {
+      font-weight: 600;
+      color: var(--color-steel);
+    }
+
+    > .description {
+      font-size: 0.75em;
+      color: var(--color-silver);
+    }
   }
 </style>

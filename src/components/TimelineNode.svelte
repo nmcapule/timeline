@@ -1,5 +1,7 @@
 <script lang="ts">
-  import { createEventDispatcher } from "svelte";
+  import { createEventDispatcher, onDestroy, onMount } from "svelte";
+  import { Subject } from "rxjs";
+  import { debounceTime } from "rxjs/operators";
 
   import type { Link, Node } from "../models/timeline";
   import { emptyLink } from "../stubs/timeline";
@@ -10,6 +12,34 @@
 
   export let node: Node;
   export let editing = false;
+
+  const linkChangeObs = new Subject();
+  onMount(() => {
+    linkChangeObs
+      .pipe(debounceTime(1000))
+      .subscribe(async (targetLink: Link) => {
+        const res = await fetch(
+          "/api/linkpreview?" + new URLSearchParams({ url: targetLink.url })
+        );
+        const json = await res.json();
+
+        targetLink = {
+          ...targetLink,
+          description: json["description"],
+          title: json["title"],
+          imageUrl: json["image"],
+        };
+
+        const links = node.links.map((link) =>
+          link.id === targetLink.id ? targetLink : link
+        );
+        dispatch("edit", { ...node, links });
+      });
+  });
+
+  onDestroy(() => {
+    linkChangeObs.complete();
+  });
 
   function linkMoveup(targetLink: Link) {
     const index = node.links.findIndex((v) => v.id === targetLink.id);
@@ -31,12 +61,12 @@
     });
     dispatch("edit", { ...node, links });
   }
-  function linkEdit(targetLink: Link, event: Event) {
-    targetLink.url = (event.target as any).value;
-    const links = node.links.map((link) =>
-      link.id === targetLink.id ? targetLink : link
-    );
-    dispatch("edit", { ...node, links });
+  async function linkEdit(targetLink: Link, event: Event) {
+    const url = (event.target as any).value;
+    targetLink = { ...targetLink, url };
+
+    // CHeck out the onmount to trace.
+    linkChangeObs.next(targetLink);
   }
   function linkAdd(targetLink: Link) {
     const links = [...node.links];
@@ -114,6 +144,7 @@
     > .links {
       display: flex;
       flex-direction: column;
+      width: 320px;
       min-width: 320px;
       margin: 12px;
 
