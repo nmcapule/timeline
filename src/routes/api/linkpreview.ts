@@ -26,6 +26,9 @@ export async function get(
     document.head
       .querySelector('meta[property="twitter:title"]')
       ?.getAttribute("content") ||
+    document.head
+      .querySelector('meta[property="og:site_name"]')
+      ?.getAttribute("content") ||
     document.title;
 
   const description =
@@ -48,8 +51,11 @@ export async function get(
     document.head
       .querySelector('meta[property="twitter:image"]')
       ?.getAttribute("content") ||
+    document.head
+      .querySelector('link[rel="apple-touch-icon"]')
+      ?.getAttribute("href") ||
     "";
 
   res.setHeader("Content-Type", "application/json");
-  res.end(JSON.stringify({ title, description, image }));
+  res.end(JSON.stringify({ title, description, image, url }));
 }

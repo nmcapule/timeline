@@ -4,7 +4,7 @@
   export let link: Link;
 </script>
 
-<a href={link.url} class="link-preview" target="_blank">
+<a href={link.url} class="link-preview" target="_blank" title={link.url}>
   {#if link.imageUrl}
     <img class="image" src={link.imageUrl} alt="link preview" />
   {/if}
@@ -12,7 +12,10 @@
   {#if link.description}
     <div class="description">{link.description}</div>
   {/if}
-</a>
+  <div class="url">
+    {link.url}
+  </div></a
+>
 
 <style lang="less">
   .link-preview {
@@ -34,6 +37,13 @@
     > .description {
       font-size: 0.75em;
       color: var(--color-silver);
+    }
+
+    > .url {
+      font-size: 0.9em;
+      color: var(--color-marvel);
+      text-overflow: ellipsis;
+      overflow: hidden;
     }
   }
 </style>
