@@ -74,7 +74,7 @@
     timeline = { ...timeline, title };
   }
   function copyExport() {
-    const elem = document.querySelector("#timeline-code");
+    const elem = document.querySelector("#timeline-code") as HTMLInputElement;
 
     elem.select();
     elem.setSelectionRange(0, 99999);

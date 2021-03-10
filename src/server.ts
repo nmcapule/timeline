@@ -1,17 +1,61 @@
-import sirv from 'sirv';
-import polka from 'polka';
-import compression from 'compression';
-import * as sapper from '@sapper/server';
+require("dotenv").config();
 
-const { PORT, NODE_ENV } = process.env;
-const dev = NODE_ENV === 'development';
+import sirv from "sirv";
+import express from "express";
+import compression from "compression";
+import * as sapper from "@sapper/server";
+import {
+  auth,
+  ConfigParams,
+  OpenidRequest,
+  OpenidResponse,
+} from "express-openid-connect";
 
-export default polka() // You can also use Express
-	.use(
-		compression({ threshold: 0 }),
-		sirv('static', { dev }),
-		sapper.middleware()
-	)
-	.listen(PORT, err => {
-		if (err) console.log('error', err);
-	});
+const {
+  PORT = 3000,
+  OAUTH_BASE_URL = "http://localhost:3000",
+  NODE_ENV = "development",
+  OAUTH_ISSUER_BASE_URL = "https://toyteller.us.auth0.com",
+  OAUTH_CLIENT_ID = "2hNLFhSu1KTOWQWgnvunrXvRl6kiHbjd",
+  COOKIE_SECRET = "storyteller-cookie-secret-788364993",
+  OAUTH_CLIENT_SECRET = "",
+  OAUTH_AUDIENCE = "https://toyteller.us.auth0.com/api/v2/",
+} = process.env;
+const dev = NODE_ENV === "development";
+
+const config: ConfigParams = {
+  attemptSilentLogin: true,
+  authRequired: false,
+  auth0Logout: true,
+  baseURL: OAUTH_BASE_URL,
+  clientID: OAUTH_CLIENT_ID,
+  issuerBaseURL: OAUTH_ISSUER_BASE_URL,
+  secret: COOKIE_SECRET,
+  clientSecret: OAUTH_CLIENT_SECRET,
+  authorizationParams: {
+    scope: "openid profile offline_access email",
+    response_type: "code",
+    audience: OAUTH_AUDIENCE,
+  },
+};
+
+const app = express() // You can also use Express
+  .use(
+    compression({ threshold: 0 }),
+    sirv("static", { dev }),
+    express.json(),
+    auth(config),
+    (req: OpenidRequest, res: OpenidResponse, next?: (err?: Error) => void) => {
+      return sapper.middleware({
+        session: () => {
+          return {
+            isAuthenticated: req.oidc.isAuthenticated(),
+            user: req.oidc.user,
+          };
+        },
+      })(req, res, next);
+    }
+  )
+  .listen(PORT);
+
+export default app;

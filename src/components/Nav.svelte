@@ -1,47 +1,53 @@
 <script lang="ts">
+  import { stores } from "@sapper/app";
+  const { session } = stores();
+
   export let segment: string;
 </script>
 
 <nav>
   <ul>
     <li>
-      <a aria-current={segment === undefined ? "page" : undefined} href="."
-        >timeline</a
-      >
+      <a aria-current={segment === undefined ? "page" : undefined} href=".">
+        timeline
+      </a>
     </li>
-    <!--
-    <li>
-      <a aria-current={segment === "about" ? "page" : undefined} href="about"
-        >about</a
-      >
-    </li>
-	-->
     <li>
       <a
         aria-current={segment === "timeline" ? "page" : undefined}
-        href="successkid">success kid</a
+        href="successkid"
       >
+        success kid
+      </a>
     </li>
-
-    <!-- for the blog link, we're using rel=prefetch so that Sapper prefetches
-		     the blog data when we hover over the link or tap it on a touchscreen -->
-    <!--
-    <li>
-      <a
-        rel="prefetch"
-        aria-current={segment === "blog" ? "page" : undefined}
-        href="blog">blog</a
-      >
-    </li>
-	-->
   </ul>
+
+  {#if $session.isAuthenticated}
+    <div class="user">
+      <div>
+        Signed in as
+        <strong>{$session.user.given_name}</strong>
+        |
+        <a href="/logout">Sign out</a>
+      </div>
+    </div>
+  {:else}
+    <a href="/login">Sign In</a>
+  {/if}
 </nav>
 
-<style>
+<style lang="less">
   nav {
     border-bottom: 1px solid rgba(255, 62, 0, 0.1);
     font-weight: 300;
     padding: 0 1em;
+    display: flex;
+    justify-content: space-between;
+
+    > .user {
+      display: flex;
+      align-items: center;
+    }
   }
 
   ul {

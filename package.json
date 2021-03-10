@@ -12,6 +12,9 @@
   },
   "dependencies": {
     "compression": "^1.7.1",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-openid-connect": "^2.2.1",
     "jsdom": "^16.5.0",
     "localforage": "^1.9.0",
     "polka": "next",
@@ -34,6 +37,7 @@
     "@rollup/plugin-url": "^5.0.0",
     "@tsconfig/svelte": "^1.0.10",
     "@types/compression": "^1.7.0",
+    "@types/express": "^4.17.11",
     "@types/jsdom": "^16.2.6",
     "@types/node": "^14.11.1",
     "@types/polka": "^0.5.1",
