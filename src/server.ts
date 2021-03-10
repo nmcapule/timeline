@@ -11,6 +11,15 @@ import {
   OpenidResponse,
 } from "express-openid-connect";
 
+// Reference: https://codechips.me/sapper-auth0-authentication/
+
+function fixUrl(url: string) {
+  if (!url.match(/http(s)?\:\/\//g)) {
+    url = `http://${url}`;
+  }
+  return url;
+}
+
 const {
   PORT = 3000,
   OAUTH_BASE_URL = "http://localhost:3000",
@@ -27,15 +36,15 @@ const config: ConfigParams = {
   attemptSilentLogin: true,
   authRequired: false,
   auth0Logout: true,
-  baseURL: OAUTH_BASE_URL,
+  baseURL: fixUrl(OAUTH_BASE_URL),
   clientID: OAUTH_CLIENT_ID,
-  issuerBaseURL: OAUTH_ISSUER_BASE_URL,
+  issuerBaseURL: fixUrl(OAUTH_ISSUER_BASE_URL),
   secret: COOKIE_SECRET,
   clientSecret: OAUTH_CLIENT_SECRET,
   authorizationParams: {
     scope: "openid profile offline_access email",
     response_type: "code",
-    audience: OAUTH_AUDIENCE,
+    audience: fixUrl(OAUTH_AUDIENCE),
   },
 };
 
