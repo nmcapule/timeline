@@ -30,6 +30,7 @@ export default {
       replace({
         "process.browser": true,
         "process.env.NODE_ENV": JSON.stringify(mode),
+        preventAssignment: true,
       }),
       svelte({
         preprocess: sveltePreprocess({ sourceMap: dev }),
@@ -85,11 +86,15 @@ export default {
 
   server: {
     input: { server: config.server.input().server.replace(/\.js$/, ".ts") },
-    output: config.server.output(),
+    output: {
+      ...config.server.output(),
+      exports: "auto",
+    },
     plugins: [
       replace({
         "process.browser": false,
         "process.env.NODE_ENV": JSON.stringify(mode),
+        preventAssignment: true,
       }),
       svelte({
         preprocess: sveltePreprocess({ sourceMap: dev }),
@@ -127,6 +132,7 @@ export default {
       replace({
         "process.browser": true,
         "process.env.NODE_ENV": JSON.stringify(mode),
+        preventAssignment: true,
       }),
       commonjs(),
       typescript({ sourceMap: dev }),

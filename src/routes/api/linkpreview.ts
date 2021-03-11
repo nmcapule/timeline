@@ -1,16 +1,14 @@
 import type { ServerResponse } from "node:http";
 import type polka from "polka";
 import { CookieJar, JSDOM } from "jsdom";
+import { fixUrl } from "../../utils/fixurl";
 
 export async function get(
   req: polka.Request,
   res: ServerResponse,
   next: () => void
 ) {
-  let url = req.query["url"] as string;
-  if (!url.match(/http(s)?\:\/\//g)) {
-    url = `http://${url}`;
-  }
+  let url = fixUrl(req.query["url"] as string);
 
   const cookieJar = new CookieJar();
   const dom = await JSDOM.fromURL(url, { cookieJar });

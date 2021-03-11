@@ -24,12 +24,8 @@
 
   {#if $session.isAuthenticated}
     <div class="user">
-      <div>
-        Signed in as
-        <strong>{$session.user.given_name}</strong>
-        |
-        <a href="/logout">Sign out</a>
-      </div>
+      <div>{$session.user.given_name} |</div>
+      <a href="/logout">Sign out</a>
     </div>
   {:else}
     <a href="/login">Sign In</a>

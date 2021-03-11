@@ -10,15 +10,9 @@ import {
   OpenidRequest,
   OpenidResponse,
 } from "express-openid-connect";
+import { fixUrl } from "./utils/fixurl";
 
 // Reference: https://codechips.me/sapper-auth0-authentication/
-
-function fixUrl(url: string) {
-  if (!url.match(/http(s)?\:\/\//g)) {
-    url = `http://${url}`;
-  }
-  return url;
-}
 
 const {
   PORT = 3000,
@@ -48,7 +42,7 @@ const config: ConfigParams = {
   },
 };
 
-const app = express() // You can also use Express
+export default express() // You can also use Express
   .use(
     compression({ threshold: 0 }),
     sirv("static", { dev }),
@@ -66,5 +60,3 @@ const app = express() // You can also use Express
     }
   )
   .listen(PORT);
-
-export default app;
