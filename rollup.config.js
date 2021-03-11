@@ -88,8 +88,9 @@ export default {
     input: { server: config.server.input().server.replace(/\.js$/, ".ts") },
     output: {
       ...config.server.output(),
-      exports: "auto",
+      exports: "default",
     },
+    preserveEntrySignatures: "strict",
     plugins: [
       replace({
         "process.browser": false,
