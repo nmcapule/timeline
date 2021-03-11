@@ -1,8 +1,10 @@
 require("dotenv").config();
 
 import sirv from "sirv";
-import express from "express";
+import { request, response } from "express";
+import polka from "polka";
 import compression from "compression";
+import cookieParser from "cookie-parser";
 import * as sapper from "@sapper/server";
 import {
   auth,
@@ -11,6 +13,7 @@ import {
   OpenidResponse,
 } from "express-openid-connect";
 import { fixUrl } from "./utils/fixurl";
+import type { IncomingMessage, ServerResponse } from "node:http";
 
 // Reference: https://codechips.me/sapper-auth0-authentication/
 
@@ -42,12 +45,23 @@ const config: ConfigParams = {
   },
 };
 
-export default express() // You can also use Express
+function expressShim(req: IncomingMessage, res: ServerResponse, next) {
+  Object.assign(req, {
+    get: request.get,
+    accepts: request.accepts,
+  });
+  Object.assign(res, response);
+
+  next();
+}
+
+export default polka()
   .use(
+    cookieParser(),
     compression({ threshold: 0 }),
-    sirv("static", { dev }),
-    express.json(),
+    expressShim,
     auth(config),
+    sirv("static", { dev }),
     (req: OpenidRequest, res: OpenidResponse, next?: (err?: Error) => void) => {
       return sapper.middleware({
         session: () => {

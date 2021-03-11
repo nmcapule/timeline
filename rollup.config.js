@@ -90,7 +90,6 @@ export default {
       ...config.server.output(),
       exports: "default",
     },
-    preserveEntrySignatures: "strict",
     plugins: [
       replace({
         "process.browser": false,
